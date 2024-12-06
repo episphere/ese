@@ -18,6 +18,8 @@ class Application {
 
   async init() {
     this.elems = this.elementRetrieval({
+      content: "#content",
+      loading: "#loading",
       explorerContainer: "#gr-container-explorer",
       closestTableContainer: "#closest-table-container",
       referenceDocumentContainer: "#reference-document-container",
@@ -54,6 +56,9 @@ class Application {
         this.data = data;
         this.data.forEach((doc, i) => doc._index = i);
         this.state.focusDocument = this.data[0];
+        
+        this.elems.loading.style.display = "none";
+        this.elems.content.style.display = "block";
       }
     
     }
