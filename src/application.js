@@ -6,7 +6,7 @@ Tabulator.registerModule([SelectRowModule])
 
 const CONSTANTS = {
   DEFAULT_STATE: {
-    dataConfig: { path: "/data/tcga_reports.json"},
+    dataConfig: { path: "data/tcga_reports.json"},
   }
 }
 
