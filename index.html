@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project</title>
+    <link rel="icon" href="images/icon.svg">
+    <link crossorigin="anonymous" type="text/css" rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" defer />
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
+    <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bootstrap5.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <div id="main-header">
+      <div id="logo-container">
+        <i id="logo-icon" class="fas fa-circle-nodes"></i>
+        <span id="logo-text">ESE</span>
+      </div>
+
+      <div id="links-container">
+        <a title="GitHub repo" href="https://github.com/episphere/"><i class="fa-brands fa-github"  data-tippy-content="GitHub" data-tippy-placement="bottom"></i> </a>
+      </div>
+    </div>
+
+    <div id="content">
+      <div id="dashboard">
+        <div id="gr-settings" class="grid-card" >
+          <i class="fas fa-cog button" data-tippy-content="Settings" popup="popup-settings"></i>
+          <i class="fas fa-database button" data-tippy-content="Data Configuration"></i>
+          <i class="fas fa-eye button" data-tippy-content="Visual Preferences"></i>
+        </div>
+        <div id="gr-container-explorer" class="grid-card"></div>
+        <div id="gr-container-closest" class="grid-card">
+          <div class="grid-card-title">Closest Documents</div>
+          <div id="closest-table-container" class="grid-card-content">Awaiting selection...</div>
+        </div>
+        <div id="gr-container-document" class="grid-card">
+          <div class="grid-card-title"><span style="color: green; margin-right: 6px; font-size: 10px">⬤</span>Reference Document</div>
+          <div id="reference-document-container" class="grid-card-content document-container">Awaiting selection...</div>
+        </div>
+        <div id="gr-container-documents" class="grid-card">
+          <div class="grid-card-title"><span style="color: blue; margin-right: 6px; font-size: 10px">⬤</span>Compared Document</div>
+          <div id="compared-document-container" class="grid-card-content document-container">Select a document to compare from the table.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="popup" class="popup">
+      <div id="popup-topbar">
+        <div id="popup-title"></div>
+        <i class="fas fa-times"></i>
+      </div>
+    </div>
+
+    <div id="popup-content-elements" style="display: none">
+      <div id="popup-settings" title="Settings">Settings</div>
+    </div>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="src/application.js" type="module"></script>
+    
+    <!-- <script src="https://unpkg.com/tippy.js@6"></script> -->
+  </body>
+
+
+</html>
