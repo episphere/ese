@@ -43,7 +43,7 @@ class Application {
 
   async dataConfigUpdated() {
     if (this.state.dataConfig.path) {
-      this.data = await (await fetch("../data/tcga_reports.json")).json();
+      this.data = await (await fetch("/ese/data/tcga_reports.json")).json();
       this.data.forEach((doc, i) => doc._index = i);
       this.state.focusDocument = this.data[0];
     }
