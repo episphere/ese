@@ -1,12 +1,13 @@
 import { euclideanDistance } from "./helper.js";
 import { State } from "./State.js";
-import { Tabulator, SelectRowModule } from 'https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/+esm'
+import { Tabulator, SelectRowModule } from 'https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/+esm';
+import jszip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
 Tabulator.registerModule([SelectRowModule])
 
 const CONSTANTS = {
   DEFAULT_STATE: {
-    dataConfig: { path: "../data/tcga_reports.json"},
+    dataConfig: { path: "/ese/data/tcga_reports.json.zip"},
   }
 }
 
@@ -43,9 +44,18 @@ class Application {
 
   async dataConfigUpdated() {
     if (this.state.dataConfig.path) {
-      this.data = await (await fetch("/ese/data/tcga_reports.json")).json();
-      this.data.forEach((doc, i) => doc._index = i);
-      this.state.focusDocument = this.data[0];
+      if (this.state.dataConfig.path.endsWith(".zip")) {
+        let data = await (await fetch(this.state.dataConfig.path)).blob();
+        const zip = new jszip();
+        await zip.loadAsync(data);
+        const filename = this.state.dataConfig.path.split("/").at(-1).replace(".zip", "");
+        data = await (await zip.file(filename)).async("string");
+        data = JSON.parse(data);
+        this.data = data;
+        this.data.forEach((doc, i) => doc._index = i);
+        this.state.focusDocument = this.data[0];
+      }
+    
     }
     this.drawExplorer();
   }
