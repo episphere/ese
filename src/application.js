@@ -5,9 +5,14 @@ import jszip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
 
 Tabulator.registerModule([SelectRowModule])
 
+const EXAMPLE_DATA = [
+  { id: "tcga_reports", path: "/ese/data/tcga_reports.json.zip"},
+  { id: "soc_codes", path: "/ese/data/soc_code_jobs.json.zip" }
+]
+
 const CONSTANTS = {
   DEFAULT_STATE: {
-    dataConfig: { path: "/ese/data/tcga_reports.json.zip"},
+    dataConfig: EXAMPLE_DATA[0]
   }
 }
 
@@ -17,6 +22,8 @@ class Application {
   }
 
   async init() {
+    this.url = new URL(window.location.href);
+
     this.elems = this.elementRetrieval({
       content: "#content",
       loading: "#loading",
@@ -33,6 +40,10 @@ class Application {
 
   initState() {
     const initialState = CONSTANTS.DEFAULT_STATE;
+
+    if (this.url.searchParams.has("example_data")) {
+      initialState.dataConfig = EXAMPLE_DATA.find(d => d.id == this.url.searchParams.get("example_data"));
+    }
     
     this.state = new State();
     this.state.defineProperty("dataConfig", initialState.dataConfig);   
