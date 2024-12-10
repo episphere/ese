@@ -1,4 +1,4 @@
-import { euclideanDistance } from "./helper.js";
+import { cosineSimilarity, embedGemini, euclideanDistance } from "./helper.js";
 import { State } from "./State.js";
 import { Tabulator, SelectRowModule } from 'https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/+esm';
 import jszip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
@@ -31,9 +31,12 @@ class Application {
       closestTableContainer: "#closest-table-container",
       referenceDocumentContainer: "#reference-document-container",
       comparedDocumentContainer: "#compared-document-container",
+      searchForm: "#search-form",
+      searchInput: "#search-input"
     })
 
     this.initState();
+    this.hookInputs();
 
     this.state.trigger("dataConfig");
   }
@@ -53,6 +56,26 @@ class Application {
     this.state.subscribe("focusDocument", () => this.focusDocumentUpdated());
     this.state.defineProperty("compareDocument", null);
     this.state.subscribe("compareDocument", () => this.compareDocumentUpdated());
+
+    // this.state.defineProperty("measure", { f: euclideanDistance, type: "distance" });
+    this.state.defineProperty("measure", { f: cosineSimilarity, type: "similarity" });
+  }
+
+  hookInputs() {
+    this.elems.searchForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (!localStorage.GEMINI_API_KEY) {
+        localStorage.GEMINI_API_KEY = prompt("A Gemini API key is required to use semantic search. Enter your's here:");
+      }
+
+      embedGemini(this.elems.searchInput.value, localStorage.GEMINI_API_KEY).then((result) => {
+        this.state.focusDocument = { 
+          text: this.elems.searchInput.value, 
+          embedding: result.embedding.values,
+        };
+      });
+    })
   }
 
   async dataConfigUpdated() {
@@ -79,8 +102,8 @@ class Application {
   async focusDocumentUpdated() {
     this.drawUpdateExplorer();
 
-    const distances = this.data.map(d => euclideanDistance(d.embedding, this.state.focusDocument.embedding));
-    this.data.forEach((doc,i) => doc._distance = distances[i]);
+    const measures = this.data.map(d => this.state.measure.f(d.embedding, this.state.focusDocument.embedding));
+    this.data.forEach((doc,i) => doc._measure = measures[i]);
     this.drawTable();
 
     this.elems.referenceDocumentContainer.innerText = this.state.focusDocument.text;
@@ -95,7 +118,6 @@ class Application {
   drawUpdateExplorer() {
     const colors = this.data.map(() => "grey");
     const sizes = this.data.map(() => 5);
-
 
     if (this.state.compareDocument) {
       this.state.compareDocument.forEach(doc =>  colors[doc._index] = "blue");
@@ -129,6 +151,8 @@ class Application {
       },
       type: 'scatter3d'
     };
+    
+
 
     const layout = {
       margin: {
@@ -148,32 +172,36 @@ class Application {
   }
 
   drawTable() {
-    const bbox = this.elems.closestTableContainer.getBoundingClientRect();
+
+    const measureType = this.state.measure.type;
 
     const tableData = this.data
-      // .filter(doc => doc.id != this.state.focusDocument.id)
       .map(doc => ({
         ...doc.properties,
-        distance: parseFloat(doc._distance.toFixed(3)),
+        [measureType]: parseFloat(doc._measure.toFixed(3)),
         _doc: doc,
+        _id: doc.id,
       }));
-    tableData.sort((a,b) => a.distance - b.distance);
+
+    if (measureType == "distance") {
+      tableData.sort((a,b) => a.distance - b.distance);
+    } else {
+      tableData.sort((a,b) => b.similarity - a.similarity);
+    }
 
     const columns = [...Object.keys(tableData[0])].filter(d => !d.startsWith("_")).map(d => ({field: d, title: d}));
 
     const table = new Tabulator(this.elems.closestTableContainer, {
       data: tableData, 
-      height: bbox.height,
+      // height: bbox.height,
       layout:"fitDataFill",
       selectableRows: true,
       selectableRowsRangeMode:"click",
-      columns
+      columns,
+      index: "_id",
     });
 
-    // table.on("rowSelected", (row) => {
-    //   console.log(row)
-    //   this.state.compareDocument = row._row.data._doc;
-    // })
+    table.on("tableBuilt", () => table.selectRow([tableData[0]._id]));
 
     table.on("rowSelectionChanged", (data, rows, selected) => {
       const compareDocuments = [];

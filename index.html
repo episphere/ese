@@ -7,7 +7,7 @@
     <link rel="icon" href="images/icon.svg">
     <link crossorigin="anonymous" type="text/css" rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" defer />
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous"> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bootstrap5.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
   </head>
@@ -36,11 +36,24 @@
           <i class="fas fa-database button" data-tippy-content="Data Configuration"></i>
           <i class="fas fa-eye button" data-tippy-content="Visual Preferences"></i>
         </div>
+        
         <div id="gr-container-explorer" class="grid-card"></div>
-        <div id="gr-container-closest" class="grid-card">
-          <div class="grid-card-title">Closest Documents</div>
-          <div id="closest-table-container" class="grid-card-content">Awaiting selection...</div>
+        <div id="gr-container-center">
+
+          <div id="gr-container-search" class="grid-card">
+            <form id="search-form">
+              <div class="grid-card-title">Semantic Search</div>
+              <input type="text" class="form-control" id="search-input" placeholder=" Search...">
+            </form>
+          </div>
+          <div id="gr-container-closest" class="grid-card">
+            <div class="grid-card-title">Closest Documents</div>
+            <div id="closest-table-container" class="grid-card-content">Awaiting selection...</div>
+          </div>
+
+         
         </div>
+        
         <div id="gr-container-document" class="grid-card">
           <div class="grid-card-title"><span style="color: green; margin-right: 6px; font-size: 10px">⬤</span>Reference Document</div>
           <div id="reference-document-container" class="grid-card-content document-container">Awaiting selection...</div>
