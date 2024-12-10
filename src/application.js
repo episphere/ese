@@ -38,6 +38,20 @@ class Application {
     this.initState();
     this.hookInputs();
 
+    let resizeTimeout;
+    const resizeObserver = new ResizeObserver(() => {
+      if (resizeTimeout) {
+        clearTimeout(resizeTimeout);
+      }
+
+      this.elems.explorerContainer.innerHTML = '';
+      resizeTimeout = setTimeout(() => {
+        this.drawExplorer();
+      }, 100);
+      
+    });
+    resizeObserver.observe(this.elems.content);
+
     this.state.trigger("dataConfig");
   }
 
@@ -151,8 +165,6 @@ class Application {
       },
       type: 'scatter3d'
     };
-    
-
 
     const layout = {
       margin: {
