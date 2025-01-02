@@ -16,7 +16,7 @@
     <div id="main-header">
       <div id="logo-container">
         <i id="logo-icon" class="fas fa-circle-nodes"></i>
-        <span id="logo-text">ESE</span>
+        <span id="logo-text"><b>ESE</b>: <i>Embedded Space Explorer</i></span>
       </div>
 
       <div id="links-container">
@@ -31,19 +31,22 @@
 
     <div id="content">
       <div id="dashboard">
-        <div id="gr-settings" class="grid-card" >
-          <i class="fas fa-cog button" data-tippy-content="Settings" popup="popup-settings"></i>
-          <i class="fas fa-database button" data-tippy-content="Data Configuration"></i>
-          <i class="fas fa-eye button" data-tippy-content="Visual Preferences"></i>
+        <div id="gr-left">
+          <div id="gr-settings" class="grid-card" >
+            <i id="button-fill" class="fas fa-fill-drip button"></i>
+            <!-- <i class="fas fa-cog button" data-tippy-content="Settings" popup="popup-settings"></i>
+            <i class="fas fa-database button" data-tippy-content="Data Configuration"></i>
+            <i class="fas fa-eye button" data-tippy-content="Visual Preferences"></i> -->
+          </div>
+          <div id="gr-container-explorer" class="grid-card"></div>
         </div>
         
-        <div id="gr-container-explorer" class="grid-card"></div>
         <div id="gr-container-center">
 
           <div id="gr-container-search" class="grid-card">
             <form id="search-form">
-              <div class="grid-card-title">Semantic Search</div>
-              <input type="text" class="form-control" id="search-input" placeholder=" Search...">
+              <!-- <div class="grid-card-title">Semantic Search</div> -->
+              <input type="text" class="form-control" id="search-input" placeholder="Semantic Search...">
             </form>
           </div>
           <div id="gr-container-closest" class="grid-card">
@@ -79,7 +82,11 @@
 
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"
+      integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS"
+      crossorigin="anonymous"></script>
     <script src="src/application.js" type="module"></script>
+    
     
     <!-- <script src="https://unpkg.com/tippy.js@6"></script> -->
   </body>

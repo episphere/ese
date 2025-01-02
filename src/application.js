@@ -1,18 +1,22 @@
-import { cosineSimilarity, embedGemini, euclideanDistance } from "./helper.js";
+import { cosineSimilarity, createDropdownButton, embedGemini, euclideanDistance, hookDropdownButton } from "./helper.js";
 import { State } from "./State.js";
 import { Tabulator, SelectRowModule } from 'https://cdn.jsdelivr.net/npm/tabulator-tables@6.2.1/+esm';
 import jszip from "https://cdn.jsdelivr.net/npm/jszip@3.10.1/+esm";
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
 
 Tabulator.registerModule([SelectRowModule])
 
 const EXAMPLE_DATA = [
-  { id: "tcga_reports", path: "/ese/data/tcga_reports.json.zip"},
+  { id: "tcga_reports", path: "/ese/data/tcga_reports.json.zip", colorBy: "cancer_type"},
+  // { id: "tcga_reports_verbose", path: "/ese/data/tcga_reports_verbose.json.zip", colorBy: "cancer_type" },
+  { id: "tcga_reports_verbose", path: "/ese/data/tcga_reports_verbose_tsne.json.zip", colorBy: "cancer_type" },
   { id: "soc_codes", path: "/ese/data/soc_code_jobs.json.zip" }
 ]
 
 const CONSTANTS = {
   DEFAULT_STATE: {
-    dataConfig: EXAMPLE_DATA[0]
+    dataConfig: EXAMPLE_DATA[1]
   }
 }
 
@@ -28,11 +32,14 @@ class Application {
       content: "#content",
       loading: "#loading",
       explorerContainer: "#gr-container-explorer",
+      closestContainer: "#gr-container-closest",
       closestTableContainer: "#closest-table-container",
       referenceDocumentContainer: "#reference-document-container",
       comparedDocumentContainer: "#compared-document-container",
       searchForm: "#search-form",
-      searchInput: "#search-input"
+      searchInput: "#search-input",
+
+      buttonFill: "#button-fill"
     })
 
     this.initState();
@@ -47,6 +54,16 @@ class Application {
       this.elems.explorerContainer.innerHTML = '';
       resizeTimeout = setTimeout(() => {
         this.drawExplorer();
+      }, 100);
+
+      // Kind of hack-y
+      this.elems.closestTableContainer.innerHTML = '';
+      resizeTimeout = setTimeout(() => {
+        const containerWidth = this.elems.closestContainer.getBoundingClientRect().width;
+        if (containerWidth > 0) {
+          this.elems.closestTableContainer.style.width = (containerWidth-35) + "px";
+        }
+        this.drawTable();
       }, 100);
       
     });
@@ -73,6 +90,11 @@ class Application {
 
     // this.state.defineProperty("measure", { f: euclideanDistance, type: "distance" });
     this.state.defineProperty("measure", { f: cosineSimilarity, type: "similarity" });
+
+    this.state.defineProperty("colorBy", initialState.dataConfig.colorBy);
+    this.state.defineProperty("colorByOptions", []);
+
+    this.state.subscribe("colorBy",  () => this.compareDocumentUpdated());
   }
 
   hookInputs() {
@@ -90,6 +112,12 @@ class Application {
         };
       });
     })
+
+    hookDropdownButton(this.elems.buttonFill, this.state, "colorBy", "colorByOptions");
+
+    // createDropdownButton(this.elems.buttonFill, [
+    //   { text: "patient_id", callback: d => d}
+    // ], { header: "Fill Points By"})
   }
 
   async dataConfigUpdated() {
@@ -104,6 +132,7 @@ class Application {
         this.data = data;
         this.data.forEach((doc, i) => doc._index = i);
         this.state.focusDocument = this.data[0];
+        this.state.colorByOptions = [...Object.keys(this.data[0].properties)];
         
         this.elems.loading.style.display = "none";
         this.elems.content.style.display = "block";
@@ -130,23 +159,31 @@ class Application {
   }
 
   drawUpdateExplorer() {
-    const colors = this.data.map(() => "grey");
+
+    let colors = this.data.map(() => "grey");
     const sizes = this.data.map(() => 5);
 
     if (this.state.compareDocument) {
-      this.state.compareDocument.forEach(doc =>  colors[doc._index] = "blue");
-     
-      sizes[this.state.compareDocument._index] = 10;
+      this.state.compareDocument.forEach(doc => colors[doc._index] = "blue");
+      this.state.compareDocument.forEach(doc => sizes[doc._index] = 10);
     }
     if (this.state.focusDocument) {
       colors[this.state.focusDocument._index] = "green";
       sizes[this.state.focusDocument._index] = 15;
     }
 
+    const colorMap = new Map();
+    const colorRange = d3.schemeCategory10;
+    const values = [...new Set(this.data.map(d => d.properties[this.state.colorBy]))];
+    values.forEach((value, i) => colorMap.set(value, colorRange[i % colorRange.length]));
+    // colors = this.data.map(d => d._measure);
+    colors = this.data.map(d => colorMap.get(d.properties[this.state.colorBy]));
+
     const update = {
       marker: { 
         color: colors,
         size: sizes,
+        // colorscale: "Blues",
       }
     };
     // setTimeout is a workaround for a Plotly bug (https://github.com/plotly/plotly.js/issues/1025)
@@ -154,6 +191,8 @@ class Application {
   }
 
   drawExplorer() {
+    if (!this.data) return;
+
     const pointTrace = {
       x: this.data.map(d => d.embedding3d[0]),
       y: this.data.map(d => d.embedding3d[1]),
@@ -180,10 +219,14 @@ class Application {
     this.elems.explorerContainer.on("plotly_click", (data) => {
       const point = data.points[0];
       this.state.focusDocument = this.data[point.pointNumber];
-    })
+    });
+
+    this.drawUpdateExplorer();
   }
 
   drawTable() {
+
+    if (!this.data) return;
 
     const measureType = this.state.measure.type;
 
