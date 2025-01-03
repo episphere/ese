@@ -8,10 +8,10 @@ import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 Tabulator.registerModule([SelectRowModule])
 
 const EXAMPLE_DATA = [
-  { id: "tcga_reports", path: "/ese/data/tcga_reports.json.zip", colorBy: "cancer_type"},
+  { id: "tcga_reports", path: "/ese/data/tcga_reports_tsne.json.zip", colorBy: "cancer_type"},
   // { id: "tcga_reports_verbose", path: "/ese/data/tcga_reports_verbose.json.zip", colorBy: "cancer_type" },
   { id: "tcga_reports_verbose", path: "/ese/data/tcga_reports_verbose_tsne.json.zip", colorBy: "cancer_type" },
-  { id: "soc_codes", path: "/ese/data/soc_code_jobs.json.zip" }
+  { id: "soc_codes", path: "/ese/data/soc_code_jobs_tsne.json.zip" }
 ]
 
 const CONSTANTS = {
