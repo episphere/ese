@@ -132,7 +132,12 @@ class Application {
         this.data = data;
         this.data.forEach((doc, i) => doc._index = i);
         this.state.focusDocument = this.data[0];
-        this.state.colorByOptions = [...Object.keys(this.data[0].properties)];
+
+        const propertyNames = [...Object.keys(this.data[0].properties)];
+        const propertyValuePairs = propertyNames.map(
+          propertyName => [propertyName, new Set(this.data.map(d => d.properties[propertyName]))]);
+
+        this.state.colorByOptions = propertyValuePairs.map(([property, values]) => ({value: property, label: `${property} (${values.size} values)`}))
         
         this.elems.loading.style.display = "none";
         this.elems.content.style.display = "block";
@@ -172,14 +177,31 @@ class Application {
       sizes[this.state.focusDocument._index] = 15;
     }
 
-    const colorMap = new Map();
-    const colorRange = d3.schemeCategory10;
-    const values = [...new Set(this.data.map(d => d.properties[this.state.colorBy]))];
-    values.forEach((value, i) => colorMap.set(value, colorRange[i % colorRange.length]));
-    // colors = this.data.map(d => d._measure);
-    colors = this.data.map(d => colorMap.get(d.properties[this.state.colorBy]));
+    const values = [...new Set(this.data.map(d => d.properties[this.state.colorBy]))].filter(d => d != null);
+
+    if (typeof values[0] == "number") {
+      const colorScale = d3.scaleSequential()
+        .domain(d3.extent(values))
+        .interpolator(d3.interpolateCividis);
+
+      colors = this.data.map(d => {
+        const value = d.properties[this.state.colorBy]
+        return value != null ? colorScale(value) : "lightgrey"
+      });
+    } else {
+      const colorMap = new Map();
+      const colorRange = d3.schemeCategory10;
+      values.forEach((value, i) => colorMap.set(value, colorRange[i % colorRange.length]));
+      // colors = this.data.map(d => d._measure);
+      colors = this.data.map(d => colorMap.get(d.properties[this.state.colorBy]) ?? "lightgrey");
+    }
+   
+
+
+    const text = this.data.map(d => d.properties[this.state.colorBy] ?? "N/A");
 
     const update = {
+      text: [text],
       marker: { 
         color: colors,
         size: sizes,
@@ -197,6 +219,8 @@ class Application {
       x: this.data.map(d => d.embedding3d[0]),
       y: this.data.map(d => d.embedding3d[1]),
       z: this.data.map(d => d.embedding3d[2]),
+      text: this.data.map(d => d.properties[this.state.colorBy]),
+      hovertemplate: '%{text} <extra></extra>',
       mode: "markers",
       marker: {
         size: this.data.map(() => 5),
