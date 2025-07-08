@@ -102,8 +102,10 @@ class Application {
       e.preventDefault();
 
       if (!localStorage.GEMINI_API_KEY) {
-        localStorage.GEMINI_API_KEY = prompt("A Gemini API key is required to use semantic search. Enter your's here:");
+        const value = prompt("A Gemini API key is required to use semantic search. Enter your's here:");
+        if (value) localStorage.GEMINI_API_KEY = value;
       }
+      
 
       embedGemini(this.elems.searchInput.value, localStorage.GEMINI_API_KEY).then((result) => {
         this.state.focusDocument = { 
